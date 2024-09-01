@@ -25,8 +25,7 @@ class hmmLearning:
 		self.emissionProbabilities = []
 
 		self.dataCount = {}
-		self.allXKeys = set()
-		self.allYKeys = set()
+		self.allXYKeys = set()
 		self.allBodyParts = []
 		self.allWords = []
 		self.emissionProbabilities = {}
@@ -43,7 +42,7 @@ class hmmLearning:
 		with open(self.dataset, 'r') as json_file:
 			words = json.load(json_file)
 			self.states = list(words.keys())
-			bodyParts = list(words['you'][0][0].keys())
+			bodyParts = list(words[self.states[0]][0][0].keys())
 			for word, videos in words.items():
 				self.data[word] = {}
 				for frames in videos:
@@ -52,24 +51,16 @@ class hmmLearning:
 							if part not in self.notIncludedParts:
 								x = round(frame[part][0])
 								y = round(frame[part][1])
-								if part+'X' in self.data[word].keys():
-									self.data[word][part+'X']['values'].append(x)
-									self.allXKeys.add(x)
+								xy = str(x)+","+str(y)
+								if part not in self.allBodyParts:
+									self.allBodyParts.append(part)
+								if part in self.data[word].keys():
+									self.data[word][part]['values'].append(xy)
+									self.allXYKeys.add(xy)
 								else:
-									self.data[word][part+'X'] = {}
-									self.data[word][part+'X']['values'] = [x]
-									self.allXKeys.add(x)
-									if part+'X' not in self.allBodyParts:
-										self.allBodyParts.append(part+'X')
-								if part+'Y' in self.data[word].keys():
-									self.data[word][part+'Y']['values'].append(y)
-									self.allYKeys.add( round(frame[part][1]) )
-								else:
-									self.data[word][part+'Y'] = {}
-									self.data[word][part+'Y']['values'] = [y]
-									self.allYKeys.add(y)
-									if part+'Y' not in self.allBodyParts:
-										self.allBodyParts.append(part+'Y')
+									self.data[word][part]= {}
+									self.data[word][part]['values'] = [xy]
+									self.allXYKeys.add(xy)
 
 
 		# CREATE DATASTRUCTURE PER BODYPART
@@ -84,24 +75,29 @@ class hmmLearning:
 								'observations': copy.deepcopy(tempObservations),
 								'emissionProbabilities': copy.deepcopy(tempEmissionProbabilities),
 								}
-
+		# print('1')
 		# SET EMISSION PROBABILITIES OF EVERY OBSERVATION IN EVERY WORD PER BODYPART
+		# self.allBodyParts.sort()
+		# print(self.allBodyParts)
+		# print(len(self.allBodyParts))
 		for part in self.allBodyParts:
-			obs = []
-			if part[-1] == 'X':
-				obs = list(self.allXKeys)
-			elif part[-1] == 'Y':
-				obs = list(self.allYKeys)
-			self.allDatas['emissions'][part]['observations'] = [obs]
+			obs = list(self.allXYKeys)
+			# print(len(obs),len(self.allXYKeys))
+			self.allDatas['emissions'][part]['observations'] = obs
+			# print(part)
 			for obsEv in obs:
+				# print(obsEv)
 				self.allDatas['emissions'][part]['emissionProbabilities'][obsEv] = {}
 				for word,history in self.data.items():
-					try:
-						self.allDatas['emissions'][part]['emissionProbabilities'][obsEv][word] = history[part]['values'].count(obsEv) / len(history[part]['values'])
-					except:
-						self.allDatas['emissions'][part]['emissionProbabilities'][obsEv][word] = history[part]['values'].count(obsEv) / len(history[part]['values'])
+					self.allDatas['emissions'][part]['emissionProbabilities'][obsEv][word] = history[part]['values'].count(obsEv) / len(history[part]['values'])
+					# try:
+					# 	self.allDatas['emissions'][part]['emissionProbabilities'][obsEv][word] = history[part]['values'].count(obsEv) / len(history[part]['values'])
+					# except:
+					# 	self.allDatas['emissions'][part]['emissionProbabilities'][obsEv][word] = history[part]['values'].count(obsEv) / len(history[part]['values'])
+		print('2')
 
 		with open('Dataset/wordTransitions.json','r') as json_file:
+		# with open('../Dataset/wordTransitions.json','r') as json_file:
 			file = json.load(json_file)
 			sentences = file['sentences']
 			tempTransitions = {}
@@ -113,7 +109,7 @@ class hmmLearning:
 					tempTransitions[i][j] = 0
 					self.allDatas['transitionProbabilities'][i][j] = 0
 
-			print(sentences)
+			# print(sentences)
 			for i in sentences:
 				# print(i[0], self.allDatas['initialProbabilities'][i[0]])
 				self.allDatas['initialProbabilities'][i[0]] += 1
@@ -122,6 +118,7 @@ class hmmLearning:
 					tempTransitions[ i[j] ][ i[j+1] ] += 1
 
 			perWordCount = {}
+			# with open('../Dataset/dataset.json') as jsonFile:
 			with open('Dataset/dataset.json') as jsonFile:
 				fil = json.load(jsonFile)
 				words = list(fil.keys())
@@ -144,21 +141,12 @@ class hmmLearning:
 					for key,val in v.items():
 						# print(k, sum(v.values()))
 						self.allDatas['transitionProbabilities'][k][key] = val/total
-			print(self.allDatas['transitionProbabilities'])
+			# print(self.allDatas['transitionProbabilities'])
+			print('3')
 
-
-	def getData(self):
-		return self.data
-
-	def saveData(self):
-		filename = 'Dataset/trainedData.json'
-		with open(filename, 'w') as file:
-			json.dump(self.data, file)
-
-	def getCount(self):
-		return self.dataCount
 
 	def saveLearningCache(self):
+		# filename = '../Dataset/learningCache.json'
 		filename = 'Dataset/learningCache.json'
 		with open(filename, 'w') as file:
 			json.dump(self.allDatas, file)
