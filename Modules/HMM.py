@@ -16,7 +16,7 @@ class HMM:
         self.B = emissionProb # Emission probability
 
         self.seq = inputSequence # Input Sequence
-        # print(self.seq)
+        print(self.seq)
 
         alpha = self.forward(self.seq, self.pi, self.A, self.B)
         self.likelihood(alpha)
