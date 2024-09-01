@@ -6,7 +6,6 @@ import os
 import cv2
 import json
 from getKeyPoints import getKeyPoints
-from Modules.EmissionTest import emissionTest
 from Modules.HMM import HMM
 import time
 import copy
@@ -84,140 +83,7 @@ class Application(tk.Frame):
         self.v_tab = tk.Label(self.video_tab,bg="black")
         self.v_tab.pack(fill=tk.BOTH,expand=1)
 
-    def get_filename(self):
-        self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("all files","*.*"),("mp4 files","*.mp4"),("mov files","*.mov")))
-        self.name = os.path.basename(self.master.filename)
-        self.lbl_filename.configure(text="Filename: "+self.name)
-        # print (self.master.filename)
-
-        self.lbl_Words['text'] = "Processing Please Wait..."
-        # self.lbl_Words.configure(text="Processing Please Wait...")
-        self.tryTestAll()
-        # PLAY VIDEO WHILE PROCESSING VIDEO
-        # self.tr = Thread(target=self.openPose.learn,args =(self.master.filename, False, self.lbl_Words, self.v_tab, self.video_tab) )
-        # self.tr2 = Thread(target=self.tryHmmEmission)
-        # self.tr.daemon = True
-        # self.tr2.daemon = True
-        # try:
-        #     self.tr.start()
-        #     self.tr2.start()
-
-        # except Exception as e:
-        #     raise
-
-        # print(self.master.filename)
-        # PLAY VIDEO AFTER LEARNING
-        # self.openPose.learn(self.master.filename, False, self.lbl_Words, self.v_tab,[self.video_tab.winfo_width(),self.video_tab.winfo_height()])
-        # self.tryHmmEmission()
-        # self.video = openPose.getPosedVideo()
-        # # self.cap_video(self.master.filename)
-        # # self.play_video()
-
-    def tryHmmEmission(self):
-        # self.tr.join()
-        # self.tr._stop()
-        testData = self.openPose.keypoints
-
-
-        with open('Dataset/learningCache.json') as json_file:
-            file = json.load(json_file)
-            # print(file.keys())
-
-            forInitProb = []
-            forTransition = []
-
-            states = tuple(file['states'])
-
-            for i in states:
-                forInitProb.append(file['initialProbabilities'][i]/sum(file['initialProbabilities'].values()))
-                tempInner = []
-                for j in states:
-                    # print(file['transitionProbabilities'][i][j])
-                    tempInner.append(file['transitionProbabilities'][i][j])
-                # print(tempInner)
-                forTransition.append(tempInner)
-            # print(forTransition)
-
-            pi = forInitProb
-            A = forTransition
-
-            mgaAnswers = {}
-
-        datasByParts = {}
-        for frame in testData:
-            for part, keyPointsXnY in frame.items():
-                if part not in self.notIncludedParts:
-                    for i in range(2):
-                        partName = part+'X' if i==0 else part+'Y'
-                        if partName not in datasByParts.keys():
-                            datasByParts[partName] = [round(keyPointsXnY[i])]
-                        else:
-                            datasByParts[partName].append(round(keyPointsXnY[i]))
-                            
-        for key, value in file['emissions'].items():
-            # print(key)
-            observations = tuple(value['observations'][0])
-
-            forEmission = {}
-            for st in states:
-                forEmission[str(st)] = []
-
-            for i in states:
-                for j in observations:
-                    forEmission[str(i)].append(value['emissionProbabilities'][str(j)][str(i)])
-
-            emm = []
-            for i in states:
-                emm.append(forEmission[i])
-            B = emm
-            sequence = []
-            for i in datasByParts[key]:
-                if i in observations:
-                    sequence.append(observations.index(i))
-
-            states = states
-            pi = np.array(pi)
-            A = np.array(A)
-            observations = observations
-            B = np.array(B)
-            sequence = np.array(sequence)
-            hmm = HMM(states, pi, A, observations, B, sequence)
-            mgaAnswers[key] = hmm.getSequence() if type(hmm.getSequence()) == type(list()) else []
-
-
-        print('The Possible answers are')
-        posAns = {}
-        for key, value in mgaAnswers.items():
-            # print(key,value)
-            tempAns = [value[0]]
-            for j in range(1,len(value)):
-                if value[j] != value[j-1]:
-                    tempAns.append(value[j])
-            posAns[key] = tempAns
-
-        posSent = []
-        ansWithCount = {}
-        for key,value in posAns.items():
-            sent = ""
-            for w in value:
-                sent+=w+" "
-            if sent not in ansWithCount.keys():
-                ansWithCount[sent] = 1
-            else:
-                ansWithCount[sent] += 1
-            if sent not in posSent:
-                posSent.append(sent)
-
-        # print(str(posSent))
-        print(ansWithCount)
-        print(self.getMax(ansWithCount))
-        self.tempANSWER = ansWithCount
-        self.lbl_Words['text'] = self.getMax(ansWithCount)
-
-
-
-    def tryTestAll(self):
-
+    def test_all(self):
         sent = ["D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\1.MOV",
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\2.MOV",
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\3.MOV",
@@ -295,15 +161,182 @@ class Application(tk.Frame):
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\4.MOV",
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\5.MOV",
                 ]
-        ans = {}
+        
         for i in sent: 
             print(i)
             self.openPose.learn(videoLocation = i, showDisplay =False, label = self.lbl_Words, vFrame = self.v_tab, scrSize = self.video_tab)
-            self.tryHmmEmission()
-            ans[i] = self.tempANSWER
-        print(ans)
-        print('Finished Test All')
+            self.tryGroupByPartLearnEmission(a=False)
 
+    def get_filename(self):
+        self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("all files","*.*"),("mp4 files","*.mp4"),("mov files","*.mov")))
+        self.name = os.path.basename(self.master.filename)
+        self.lbl_filename.configure(text="Filename: "+self.name)
+        # print (self.master.filename)
+
+        self.lbl_Words['text'] = "Processing Please Wait..."
+        self.test_all()
+        # self.lbl_Words.configure(text="Processing Please Wait...")
+        # print(self.master.filename)
+        # self.tr = Thread(target=self.openPose.learn,args =(self.master.filename, False, self.lbl_Words, self.v_tab, self.video_tab) )
+        # # self.tr2 = Thread(target=self.tryHmmEmission)
+        # self.tr2 = Thread(target=self.tryGroupByPartLearnEmission)
+        # self.tr.daemon = True
+        # self.tr2.daemon = True
+        # try:
+        #     self.tr.start()
+        #     self.tr2.start()
+
+        # except Exception as e:
+        #     raise
+
+
+
+
+        # self.openPose.learn(self.master.filename, False, self.lbl_Words, self.v_tab,[self.video_tab.winfo_width(),self.video_tab.winfo_height()])
+        # self.tryHmmEmission()
+
+        # self.video = openPose.getPosedVideo()
+        # # self.cap_video(self.master.filename)
+        # # self.play_video()
+
+    def tryGroupByPartLearnEmission(self,a=True):
+        if a:
+            self.tr.join()
+            self.tr._stop()
+        testData = self.openPose.keypoints
+
+
+        with open('Dataset/learningCache.json') as json_file:
+            file = json.load(json_file)
+            # print(file.keys())
+            forInitProb = []
+            forTransition = []
+            states = tuple(file['states'])
+
+            for i in states:
+                forInitProb.append(file['initialProbabilities'][i]/sum(file['initialProbabilities'].values()))
+                tempInner = []
+                for j in states:
+                    # print(file['transitionProbabilities'][i][j])
+                    tempInner.append(file['transitionProbabilities'][i][j])
+                # print(tempInner)
+                forTransition.append(tempInner)
+            # print(forTransition)
+            pi = forInitProb
+            A = forTransition
+            mgaAnswers = {}
+
+        datasByParts = {}
+        for frame in testData:
+            for part, keyPointsXnY in frame.items():
+                # print(keyPointsXnY)
+                if part not in self.notIncludedParts:
+                    datass = str(int(round(keyPointsXnY[0])))+","+str(int(round(keyPointsXnY[1])))
+                    if part not in datasByParts.keys():
+                        datasByParts[part] = [datass]
+                    else:
+                        datasByParts[part].append(datass)
+        # print(file)
+        for key, value in file['emissions'].items():
+            # print(key)
+            # print(value)
+            observations = tuple(value['observations'])
+
+            forEmission = {}
+            for st in states:
+                forEmission[str(st)] = []
+
+            for i in states:
+                for j in observations:
+                    forEmission[str(i)].append(value['emissionProbabilities'][str(j)][str(i)])
+
+            emm = []
+            for i in states:
+                emm.append(forEmission[i])
+            B = emm
+            sequence = []
+            for i in datasByParts[key]:
+                # print(i)
+                if i in observations:
+                    sequence.append(observations.index(i))
+                # else:
+                    # print('WOW')
+
+            # print(sequence)
+            states = states
+            # print(states)
+            pi = np.array(pi)
+            # print(pi)
+            A = np.array(A)
+            # print(A)
+            # print(len(observations))
+            observations = observations
+            # print(B)
+            B = np.array(B)
+            sequence = np.array(sequence)
+            # print(len(sequence))
+            # print(sequence)
+            hmm = HMM(states, pi, A, observations, B, sequence)
+            mgaAnswers[key] = hmm.getSequence() if type(hmm.getSequence()) == type(list()) else []
+
+
+        print('The Possible answers are')
+        # print(mgaAnswers)
+        posAns = {}
+        for key, value in mgaAnswers.items():
+            # print(key,value)
+            tempAns = [value[0]]
+            for j in range(1,len(value)):
+                if value[j] != value[j-1]:
+                    tempAns.append(value[j])
+            posAns[key] = tempAns
+
+        posSent = []
+        ansWithCount = {}
+        for key,value in posAns.items():
+            sent = ""
+            for w in value:
+                sent+=w+" "
+            if sent not in ansWithCount.keys():
+                ansWithCount[sent] = 1
+            else:
+                ansWithCount[sent] += 1
+            if sent not in posSent:
+                posSent.append(sent)
+
+        # print(str(posSent))
+        print(ansWithCount)
+        print(self.getMax(ansWithCount))
+        self.lbl_Words['text'] = self.getMax(ansWithCount)
+        # print(mgaAnswers)
+
+
+    def tryEmissionTest(self,testData):
+        emTest = emissionTest(testData)
+        emTest.start()
+        emissions = emTest.getEmissions()
+        parts = list(emissions[0].keys())
+        wordss = list(emissions[0]['leftLFOneX'].keys())
+        print(parts)
+        print(wordss)
+        some = {}
+        for frame in emissions:
+            # print("FRAME!!!!\n\n\n\n")
+            for part,datas in frame.items():
+                if part not in some.keys():
+                    some[part] = {}
+                for word,val in datas.items():
+                    if word not in some[part].keys():
+                        some[part][word] = val
+                    else:
+                        some[part][word] += val
+        # print(some)
+        mgaAns = []
+        for  k,v in some.items():
+            an = self.getMax(v)
+            mgaAns.append(an)
+            print(k, an, v)
+        print(mgaAns)
 
     def getMax(self, PartWords):
         curMax = 0
