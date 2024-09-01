@@ -1,16 +1,14 @@
 from tkinter import filedialog
 from tkinter import ttk
 from PIL import ImageTk, Image
-from getKeyPoints import getKeyPoints
-from Modules.EmissionLearn import emissionLearn
-from Modules.HmmEmission import hmmLearning
-from tkinter import messagebox
-from Modules.Entry import EntryWP
 import tkinter as tk
 import numpy as np
 import os
 import cv2
 import json
+from getKeyPoints import getKeyPoints
+from Modules.HmmEmission import hmmLearning
+from tkinter import messagebox
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -36,8 +34,6 @@ class Application(tk.Frame):
         self.wordsList = []
         self.fileLocations = []
         self.btn_file = []
-        self.mgafileExtension = ['.mp4','.mov','.avi']
-        openPose = getKeyPoints()
         self.__init__window()
 
     def init_window(self):
@@ -48,7 +44,6 @@ class Application(tk.Frame):
         self.x = (self.ws/2) - (self.w/2)
         self.y = (self.hs/2) - (self.h/2)
         self.master.geometry('%dx%d+%d+%d'%(self.w,self.h,self.x,self.y))
-        self.master.resizable(width=False, height=False)
         self.master.title('ASLT Prototype')
         self.master.configure(background='white')
         self.master.iconbitmap(r'Assets/icons/sign/favicon.ico')
@@ -84,10 +79,10 @@ class Application(tk.Frame):
         self.bottom_frame.grid(row=3, sticky="nw")
 
     def create_widgets(self):
-        self.text_name.append(EntryWP(self.scroll_frame,"Type Word"))
+        self.text_name.append(tk.Entry(self.scroll_frame,bg="#292f3d", fg="white", font=('bold',12)))
         self.text_name[len(self.text_name)-1].grid(row=len(self.text_name)-1,column=0,sticky="news")
 
-        self.text_filename.append(tk.Entry(self.scroll_frame,font=("bold",12)))
+        self.text_filename.append(tk.Entry(self.scroll_frame, bg="#292f3d", fg="white", font=('bold',12)))
         self.text_filename[len(self.text_filename)-1].grid(row=len(self.text_filename)-1,column=1,sticky="nesw")
 
         self.btn_file.append(tk.Button(self.scroll_frame,bg="gray", text="Insert File",font=('bold',12),width=14,command=self.get_filename))
@@ -106,17 +101,17 @@ class Application(tk.Frame):
         self.button_train_word = tk.Button(self.bottom_frame, text="Start Training",font=('bold',12),bg="green",width=9,command=self.train_signs)
         self.button_train_word.grid(row=0,column=3,sticky="e")
 
-        # self.button_train_asd = tk.Button(self.bottom_frame, text="Train All",font=('bold',12),bg="green",width=9,command=self.autoDoThis)
-        # self.button_train_asd.grid(row=0,column=4,sticky="e")
+        self.button_train_asd = tk.Button(self.bottom_frame, text="autoDoThis",font=('bold',12),bg="green",width=9,command=self.autoDoThis)
+        self.button_train_asd.grid(row=0,column=4,sticky="e")
     
     def add_entry(self):
-        if self.text_name[len(self.text_name)-1].get()=="Type Word" or self.text_filename[len(self.text_filename)-1].get()=="Filename":
+        if self.text_name[len(self.text_name)-1].get()=="" or self.text_filename[len(self.text_filename)-1].get()=="":
             pass
         else:
-            self.text_name.append(EntryWP(self.scroll_frame,"Type Word"))
+            self.text_name.append(tk.Entry(self.scroll_frame, bg="#292f3d", fg="white", font=('bold',12)))
             self.text_name[len(self.text_name)-1].grid(row=len(self.text_name)-1,column=0,sticky="nesw")
 
-            self.text_filename.append(tk.Entry(self.scroll_frame,font=("bold",12)))
+            self.text_filename.append(tk.Entry(self.scroll_frame, bg="#292f3d", fg="white", font=('bold',12)))
             self.text_filename[len(self.text_filename)-1].grid(row=len(self.text_filename)-1,column=1,sticky="nesw")
 
             self.btn_file.append(tk.Button(self.scroll_frame,bg="gray", text="Insert File",width=14,font=('bold',12),command=self.get_filename))
@@ -156,54 +151,42 @@ class Application(tk.Frame):
         x = 0
 
     def train_signs(self):
-        wordsLista = []
+        self.wordsList = []
         for i in self.text_name:
-            wordsLista.append(str(i.get()).lower())
-        # print(self.text_name[0].get())
+            self.wordsList.append(str(i.get()).lower())
+        print(self.wordsList)
         numOfWords = len(self.text_name)
-        noTypeError = True
-        typeErrors = []
-        # print(self.fileLocations)
-        if len(self.fileLocations) != 0:
-            for i in self.fileLocations:
-                for j in self.mgafileExtension:
-                    typeErrors.append(j.lower() not in i.lower())
-                    # print(i.lower(), j.lower(), j.lower() not in i.lower())
-            noTypeError = True in typeErrors
-        else:
-            noTypeError = False
-
-        if 'type word' not in wordsLista and '' not in self.fileLocations and noTypeError:
+        if "" not in self.wordsList or "" not in self.fileLocations:
             for i in range(numOfWords):
-                wordName = wordsLista[i]
+                wordName = self.wordsList[i]
                 fileLocation = self.fileLocations[i]
-                # print("Word:",wordsLista[i])
+                # print("Word:",self.wordsList[i])
                 # print("Location:",self.fileLocations[i])
+                openPose = getKeyPoints()
                 openPose.learn(fileLocation,showDisplay=False)
                 self.saveToDataset(openPose.getKeyPoints(), wordName)
             with open(self.wordTransitionsLocation,'r') as wordTransitionsDataset:
                 transitionsDataset = json.load(wordTransitionsDataset)
-                transitionsDataset['sentences'].append(wordsLista)
+                transitionsDataset['sentences'].append(self.wordsList)
                 datasetString = json.dumps(transitionsDataset, cls=MyEncoder)
                 f = open(self.wordTransitionsLocation,'w')
                 f.write(datasetString)
                 f.close()
 
-            learning = hmmLearning(self.datasetLocation)
-            learning.startLearnFromDataset()
-            learning.saveLearningCache()
-
-            for i in range(len(self.text_name)):
-                self.delete_entry()
-            self.text_filename[0].delete(0,'end')
-            self.text_name[0].delete(0,'end')
-
-            print('FINISHED!!!')
-            messagebox.showinfo("Complete", 'Learn Complete!!!')
         else:
             print('SOMETHING IS EMPTY PLEASE FILL IT IN!!!')
-            messagebox.showinfo('ERROR','AN ENTRY IS INVALID!!!')
 
+        learning = hmmLearning(self.datasetLocation)
+        learning.startLearnFromDataset()
+        learning.saveLearningCache()
+
+        for i in range(len(self.text_name)):
+            self.delete_entry()
+        self.text_filename[0].delete(0,'end')
+        self.text_name[0].delete(0,'end')
+
+        print('FINISHED!!!')
+        messagebox.showinfo("Complete", 'Learn Complete!!!')
 
     def saveToDataset(self,data,word):
         
@@ -290,105 +273,105 @@ class Application(tk.Frame):
             ['nice','meet','you']
             ]
         mgaLocation = [
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 1\\You 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 1\\Okay 1.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 2\\You 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 2\\Okay 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 3\\You 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 3\\Okay 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 4\\You 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 4\\Okay 4.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 5\\You 5.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Are you okay\\You Okay 5\\Okay 5.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 1\\Good 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 1\\Morning 1.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 2\\Good 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 2\\Morning 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 3\\Good 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 3\\Morning 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 4\\Good 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 4\\Morning 4.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 5\\Good 5.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 5\\Morning 5.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 6\\Good 6.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Good Morning\\Good Morning 6\\Morning 6.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 1\\How 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 1\\You 1.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 2\\How 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 2\\You 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 3\\How 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 3\\You 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 4\\How 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 4\\You 4.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 5\\How 5.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 5\\You 5.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 6\\How 6.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 6\\You 6.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 7\\How 7.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 7\\You 7.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 8\\How 8.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 8\\You 8.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 9\\How 9.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How are you\\How You 9\\You 9.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 1\\Old.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 1\\You.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 2\\Old 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 2\\You 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 3\\Old 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 3\\You 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 4\\Old 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 4\\You 4.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 5\\Old 5.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 5\\You 5.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 6\\Old 6.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 6\\You 6.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 7\\Old 7.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\How old are you\\Old You 7\\You 7.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 1\\I 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 1\\Like 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 1\\You 1.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 2\\I 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 2\\Like 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 2\\You 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 3\\I 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 3\\Like 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 3\\You 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 4\\I 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 4\\Like 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 4\\You 4.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 5\\I 5.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 5\\Like 5.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I like you\\I Like You 5\\You 5.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\I\'m Fine 1\\Im 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\I\'m Fine 1\\Fine 1.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 2\\Im 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 2\\Fine 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 3\\Im 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 3\\Fine 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 4\\Im 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 4\\Fine 4.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 5\\Im 5.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 5\\Fine 5.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 6\\Im 6.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 6\\Fine 6.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 7\\Im 7.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\I\'m fine\\Im Fine 7\\Fine 7.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Let\'s eat\\Eat 1\\Eat 1.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Let\'s eat\\Eat 2\\Eat 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Let\'s eat\\Eat 3\\Eat 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Let\'s eat\\Eat 4\\Eat 4.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 1\\Where 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 1\\You 1.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 1\\From 1.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 2\\Where 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 2\\You 2.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 2\\From 2.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 3\\Where 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 3\\You 3.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 3\\From 3.mp4'],
-            ['D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 4\\Where 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 4\\You 4.mp4',
-            'D:\\Users\\JanlofreDy\\Desktop\\American Sign Language Translator Prototype\\Development Trial\\Sign Language Videos\\Where are you from\\Where You From 4\\From 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 1\\You 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 1\\Okay 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 2\\You 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 2\\Okay 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 3\\You 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 3\\Okay 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 4\\You 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 4\\Okay 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 5\\You 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 5\\Okay 5.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 1\\Good 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 1\\Morning 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 2\\Good 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 2\\Morning 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 3\\Good 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 3\\Morning 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 4\\Good 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 4\\Morning 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 5\\Good 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 5\\Morning 5.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 6\\Good 6.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 6\\Morning 6.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 1\\How 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 1\\You 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 2\\How 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 2\\You 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 3\\How 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 3\\You 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 4\\How 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 4\\You 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 5\\How 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 5\\You 5.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 6\\How 6.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 6\\You 6.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 7\\How 7.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 7\\You 7.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 8\\How 8.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 8\\You 8.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 9\\How 9.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How are you\\How You 9\\You 9.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 1\\Old.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 1\\You.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 2\\Old 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 2\\You 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 3\\Old 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 3\\You 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 4\\Old 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 4\\You 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 5\\Old 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 5\\You 5.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 6\\Old 6.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 6\\You 6.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 7\\Old 7.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\How old are you\\Old You 7\\You 7.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 1\\I 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 1\\Like 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 1\\You 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 2\\I 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 2\\Like 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 2\\You 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 3\\I 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 3\\Like 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 3\\You 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 4\\I 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 4\\Like 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 4\\You 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 5\\I 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 5\\Like 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I like you\\I Like You 5\\You 5.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\I\'m Fine 1\\Im 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\I\'m Fine 1\\Fine 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 2\\Im 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 2\\Fine 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 3\\Im 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 3\\Fine 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 4\\Im 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 4\\Fine 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 5\\Im 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 5\\Fine 5.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 6\\Im 6.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 6\\Fine 6.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 7\\Im 7.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\I\'m fine\\Im Fine 7\\Fine 7.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Let\'s eat\\Eat 1\\Eat 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Let\'s eat\\Eat 2\\Eat 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Let\'s eat\\Eat 3\\Eat 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Let\'s eat\\Eat 4\\Eat 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 1\\Where 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 1\\You 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 1\\From 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 2\\Where 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 2\\You 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 2\\From 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 3\\Where 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 3\\You 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 3\\From 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 4\\Where 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 4\\You 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Where are you from\\Where You From 4\\From 4.mp4'],
             ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\What are you doing\\Doing 1\\Doing 1.mp4'],
             ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\What are you doing\\Doing 2\\Doing 2.mp4'],
             ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\What are you doing\\Doing 3\\Doing 3.mp4'],
@@ -406,6 +389,7 @@ class Application(tk.Frame):
             'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Nice to meet you\\Nice Meet You 4\\Meet 4.mp4',
             'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Nice to meet you\\Nice Meet You 4\\You 4.mp4']
             ]
+        # print(len(mgaWords),len(mgaLocation))
         for sentNum in range(len(mgaWords)):
             for wordNum in range(len(mgaWords[sentNum])):
                 wordName = mgaWords[sentNum][wordNum]
