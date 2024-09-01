@@ -7,7 +7,6 @@ import cv2
 import json
 from getKeyPoints import getKeyPoints
 from Modules.EmissionTest import emissionTest
-from tkinter import messagebox
 from Modules.HMM import HMM
 import time
 import copy
@@ -17,13 +16,11 @@ class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.openPose = getKeyPoints()
         self.__init__window()
         self.har = 0
         self.frameNum = -1
         self.video = ''
         self.notIncludedParts = ['neck','nose','midHip','rightShoulder','leftShoulder','rightElbow','leftElbow']
-
     #Don't mind, just a null function
     def donothing(self):
         x = 0
@@ -42,6 +39,7 @@ class Application(tk.Frame):
         self.__init__menu()
         self.__init__winlayout()
         self.__init__widgets()
+        self.openPose = getKeyPoints()
         self.tr = None
         self.tr2 = None
     # initializing Menu
@@ -93,8 +91,9 @@ class Application(tk.Frame):
 
         self.lbl_Words['text'] = "Processing Please Wait..."
         # self.lbl_Words.configure(text="Processing Please Wait...")
-        # self.tryTestAll()
-        # PLAY VIDEO WHILE PROCESSING VIDEO
+
+       
+        # self.openPose = getKeyPoints()
         self.tr = Thread(target=self.openPose.learn,args =(self.master.filename, False, self.lbl_Words, self.v_tab, self.video_tab) )
         self.tr2 = Thread(target=self.tryHmmEmission)
         self.tr.daemon = True
@@ -102,21 +101,32 @@ class Application(tk.Frame):
         try:
             self.tr.start()
             self.tr2.start()
+            # self.tr.join()
+            # self.tr2.join()
+
         except Exception as e:
             raise
-
-        # print(self.master.filename)
-        # PLAY VIDEO AFTER LEARNING
         # self.openPose.learn(self.master.filename, False, self.lbl_Words, self.v_tab,[self.video_tab.winfo_width(),self.video_tab.winfo_height()])
-        # self.tryHmmEmission()
         # self.video = openPose.getPosedVideo()
+
         # # self.cap_video(self.master.filename)
         # # self.play_video()
+        # self.tryHmmEmission()
 
     def tryHmmEmission(self):
         self.tr.join()
         self.tr._stop()
         testData = self.openPose.keypoints
+        datasByParts = {}
+        for frame in testData:
+            for part, keyPointsXnY in frame.items():
+                if part not in self.notIncludedParts:
+                    for i in range(2):
+                        partName = part+'X' if i==0 else part+'Y'
+                        if partName not in datasByParts.keys():
+                            datasByParts[partName] = [round(keyPointsXnY[i])]
+                        else:
+                            datasByParts[partName].append(round(keyPointsXnY[i]))
 
 
         with open('Dataset/learningCache.json') as json_file:
@@ -143,174 +153,93 @@ class Application(tk.Frame):
 
             mgaAnswers = {}
 
-        datasByParts = {}
-        for frame in testData:
-            for part, keyPointsXnY in frame.items():
-                if part not in self.notIncludedParts:
-                    for i in range(2):
-                        partName = part+'X' if i==0 else part+'Y'
-                        if partName not in datasByParts.keys():
-                            datasByParts[partName] = [round(keyPointsXnY[i])]
-                        else:
-                            datasByParts[partName].append(round(keyPointsXnY[i]))
-                            
-        for key, value in file['emissions'].items():
-            # print(key)
-            observations = tuple(value['observations'][0])
+            for key, value in file['emissions'].items():
+                # print(key)
+                observations = tuple(value['observations'][0])
 
-            forEmission = {}
-            for st in states:
-                forEmission[str(st)] = []
+                forEmission = {}
+                for st in states:
+                    forEmission[str(st)] = []
 
-            for i in states:
-                for j in observations:
-                    forEmission[str(i)].append(value['emissionProbabilities'][str(j)][str(i)])
+                for i in states:
+                    for j in observations:
+                        forEmission[str(i)].append(value['emissionProbabilities'][str(j)][str(i)])
 
-            emm = []
-            for i in states:
-                emm.append(forEmission[i])
-            B = emm
-            sequence = []
-            for i in datasByParts[key]:
-                if i in observations:
-                    sequence.append(observations.index(i))
+                emm = []
+                for i in states:
+                    emm.append(forEmission[i])
+                B = emm
+                sequence = []
+                for i in datasByParts[key]:
+                    if i in observations:
+                        sequence.append(observations.index(i))
 
-            states = states
-            pi = np.array(pi)
-            A = np.array(A)
-            observations = observations
-            B = np.array(B)
-            sequence = np.array(sequence)
-            hmm = HMM(states, pi, A, observations, B, sequence)
-            mgaAnswers[key] = hmm.getSequence() if type(hmm.getSequence()) == type(list()) else []
+                states = states
+                pi = np.array(pi)
+                A = np.array(A)
+                observations = observations
+                B = np.array(B)
+                sequence = np.array(sequence)
+                hmm = HMM(states, pi, A, observations, B, sequence)
+                mgaAnswers[key] = hmm.getSequence() if type(hmm.getSequence()) == type(list()) else []
 
 
-        print('The Possible answers are')
-        posAns = {}
-        for key, value in mgaAnswers.items():
-            # print(key,value)
-            tempAns = [value[0]]
-            for j in range(1,len(value)):
-                if value[j] != value[j-1]:
-                    tempAns.append(value[j])
-            posAns[key] = tempAns
+            print('The Possible answers are')
+            posAns = {}
+            for key, value in mgaAnswers.items():
+                tempAns = [value[0]]
+                for j in range(1,len(value)):
+                    if value[j] != value[j-1]:
+                        tempAns.append(value[j])
+                posAns[key] = tempAns
 
-        posSent = []
-        ansWithCount = {}
-        for key,value in posAns.items():
-            sent = ""
-            for w in value:
-                sent+=w+" "
-            if sent not in ansWithCount.keys():
-                ansWithCount[sent] = 1
-            else:
-                ansWithCount[sent] += 1
-            if sent not in posSent:
-                posSent.append(sent)
+            posSent = []
+            ansWithCount = {}
+            for key,value in posAns.items():
+                sent = ""
+                for w in value:
+                    sent+=w+" "
+                if sent not in ansWithCount.keys():
+                    ansWithCount[sent] = 1
+                else:
+                    ansWithCount[sent] += 1
+                if sent not in posSent:
+                    posSent.append(sent)
 
-        # print(str(posSent))
-        print(ansWithCount)
-        print(self.getMax(ansWithCount))
-        self.tempANSWER = ansWithCount
-        ansString = ""
-        for i,j in sorted(ansWithCount.items(), key = 
-             lambda kv:(kv[1], kv[0]), reverse=True):
-            print(i,j)
-            ansString += str(i) + "=" + str(j) + "\n"
-
-        self.lbl_Words['text'] = self.getMax(ansWithCount)
-        messagebox.showinfo("Possible Answers", ansString)
+            print(str(posSent))
+            print(ansWithCount)
+            self.lbl_Words['text'] = self.getMax(ansWithCount)
 
 
 
-    def tryTestAll(self):
-        sent = [
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\6.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\7.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\8.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\1.mov",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\6.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\7.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\8.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Good Morning\\9.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\1.mov",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\6.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\7.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\8.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\9.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\10.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\How are You\\11.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\6.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\7.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\8.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\how Old are You\\9.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I Like You\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I Like You\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I Like You\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I Like You\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I Like You\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I Like You\\6.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\6.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\7.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\8.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\I'm Fine\\9.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\let's Eat\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\let's Eat\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\let's Eat\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\let's Eat\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\let's Eat\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\6.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\7.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\8.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Nice to Meet You\\9.mov",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\what are you Doing\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\what are you Doing\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\what are you Doing\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\what are you Doing\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\what are you Doing\\5.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\1.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\2.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\3.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\4.MOV",
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\5.MOV",
-                ]
-        ans = {}
-        for i in sent: 
-            print(i)
-            self.openPose.learn(videoLocation = i, showDisplay =False, label = self.lbl_Words, vFrame = self.v_tab, scrSize = self.video_tab)
-            self.tryHmmEmission()
-            ans[i] = self.tempANSWER
-        print(ans)
-        print('Finished Test All')
 
+
+    def tryEmissionTest(self,testData):
+        emTest = emissionTest(testData)
+        emTest.start()
+        emissions = emTest.getEmissions()
+        parts = list(emissions[0].keys())
+        wordss = list(emissions[0]['leftLFOneX'].keys())
+        print(parts)
+        print(wordss)
+        some = {}
+        for frame in emissions:
+            # print("FRAME!!!!\n\n\n\n")
+            for part,datas in frame.items():
+                if part not in some.keys():
+                    some[part] = {}
+                for word,val in datas.items():
+                    if word not in some[part].keys():
+                        some[part][word] = val
+                    else:
+                        some[part][word] += val
+        # print(some)
+        mgaAns = []
+        for  k,v in some.items():
+            an = self.getMax(v)
+            mgaAns.append(an)
+            print(k, an, v)
+        print(mgaAns)
 
     def getMax(self, PartWords):
         curMax = 0

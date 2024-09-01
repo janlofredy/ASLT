@@ -7,15 +7,15 @@ class HMM:
 
         self.states = states # Words 
 
-        self.pi = initProb  # Initial probability 
+        self.pi = initProb  #initial probability 
 
-        self.A = transProb # Transition probability 
+        self.A = transProb #Transition probability 
 
         self.observations = observe # Observations
 
-        self.B = emissionProb # Emission probability
+        self.B = emissionProb #Emission probability
 
-        self.seq = inputSequence # Input Sequence
+        self.seq = inputSequence # input Sequence
 
         alpha = self.forward(self.seq, self.pi, self.A, self.B)
         self.likelihood(alpha)
@@ -23,11 +23,10 @@ class HMM:
         beta.T
         self.gamma(alpha,beta)
         self.Answer = self.viterbi(self.seq, self.pi, self.A, self.B)
-
         # print("Observed Sequence is:", ", ",list(map(lambda y: self.observations[y], self.seq)))
         # print("Possible Outcome is:", ", ", list(map(lambda s: self.states[s], self.Answer)))
 
-# BAUM WELCH Algorithm or Forward-Backward Algorithm
+
     # Forward Path
     def forward(self,obs_seq, pi, A, B):
         T = len(obs_seq)
@@ -43,7 +42,7 @@ class HMM:
         # using the forward part of the forward-backward algorithm
         return  alpha[-1].sum()
 
-    # Backward Path
+
     def backward(self,obs_seq, A, B):
         N = A.shape[0]
         T = len(obs_seq)
@@ -56,7 +55,7 @@ class HMM:
                 beta[n,t] = np.sum(beta[:,t+1] * A[n,:] * B[:, obs_seq[t+1]])
 
         return beta
-# Baum-welch End
+
 
     def gamma(self,alpha, beta):
         obs_prob = self.likelihood(alpha)

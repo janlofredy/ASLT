@@ -59,8 +59,7 @@ class hmmLearning:
 									self.data[word][part+'X'] = {}
 									self.data[word][part+'X']['values'] = [x]
 									self.allXKeys.add(x)
-									if part+'X' not in self.allBodyParts:
-										self.allBodyParts.append(part+'X')
+									self.allBodyParts.append(part+'X')
 								if part+'Y' in self.data[word].keys():
 									self.data[word][part+'Y']['values'].append(y)
 									self.allYKeys.add( round(frame[part][1]) )
@@ -68,8 +67,7 @@ class hmmLearning:
 									self.data[word][part+'Y'] = {}
 									self.data[word][part+'Y']['values'] = [y]
 									self.allYKeys.add(y)
-									if part+'Y' not in self.allBodyParts:
-										self.allBodyParts.append(part+'Y')
+									self.allBodyParts.append(part+'Y')
 
 
 		# CREATE DATASTRUCTURE PER BODYPART
@@ -113,13 +111,11 @@ class hmmLearning:
 					tempTransitions[i][j] = 0
 					self.allDatas['transitionProbabilities'][i][j] = 0
 
-			print(sentences)
 			for i in sentences:
-				# print(i[0], self.allDatas['initialProbabilities'][i[0]])
-				self.allDatas['initialProbabilities'][i[0]] += 1
-				# print(self.allDatas['initialProbabilities'])
 				for j in range(len(i)-1):
 					tempTransitions[ i[j] ][ i[j+1] ] += 1
+					if j == 0:
+						self.allDatas['initialProbabilities'][i[j]]+=1
 
 			perWordCount = {}
 			with open('Dataset/dataset.json') as jsonFile:
