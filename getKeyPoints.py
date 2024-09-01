@@ -353,23 +353,23 @@ class getKeyPoints():
 				oldFormattedPose['leftLFTwo'] = oldPose['leftHand']['18']
 				# 						leftLFThree
 				oldFormattedPose['leftLFThree'] = oldPose['leftHand']['19']
-				# 							leftLFFourA
-				oldFormattedPose['leftLFFourA'] = oldPose['leftHand']['20']
+				# 							leftLFFour
+				oldFormattedPose['leftLFFour'] = oldPose['leftHand']['20']
 				# 				leftRFOne
 				oldFormattedPose['leftRFOne'] = oldPose['leftHand']['13']
 				# 					leftRFTwo
 				oldFormattedPose['leftRFTwo'] = oldPose['leftHand']['14']
 				#						leftRFThree
 				oldFormattedPose['leftRFThree'] = oldPose['leftHand']['15']
-				# 							leftRFFourA
-				oldFormattedPose['leftRFFourA'] = oldPose['leftHand']['16']
+				# 							leftRFFour
+				oldFormattedPose['leftRFFour'] = oldPose['leftHand']['16']
 				# 				leftMFOne
 				oldFormattedPose['leftMFOne'] = oldPose['leftHand']['9']
 				# 					leftMFTwo
 				oldFormattedPose['leftMFTwo'] = oldPose['leftHand']['10']
-				# 						leftLFMThree
-				oldFormattedPose['leftLFMThree'] = oldPose['leftHand']['11']
-				# 							leftMFFourA
+				# 						leftMFThree
+				oldFormattedPose['leftMFThree'] = oldPose['leftHand']['11']
+				# 							leftMFFour
 				oldFormattedPose['leftMFFour'] = oldPose['leftHand']['12']
 				# 				leftPFOne
 				oldFormattedPose['leftPFOne'] = oldPose['leftHand']['5']
@@ -585,6 +585,7 @@ class getKeyPoints():
 
 		print('Finished Processing')
 		self.compensateSizePosition()
+		self.removeUselessFrames()
 		return self.keypoints
 
 	def writeJSON(self,word):
