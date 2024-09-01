@@ -133,10 +133,6 @@ class Application(tk.Frame):
             self.btn_file.pop(len(self.btn_file)-1)
 
     def print_values(self):
-        learning = hmmLearning(self.datasetLocation)
-        learning.startLearnFromDataset()
-        learning.saveLearningCache()
-        print('FINISHED!!!')
         name = len(self.text_name)
         for x in range(name):
             print("Word: ",self.text_name[x].get(),"  File:",self.text_filename[x].get())
@@ -220,11 +216,11 @@ class Application(tk.Frame):
 
     def autoDoThis(self):
         mgaWords = [
-            # ['you','okay'],
-            # ['you','okay'],
-            # ['you','okay'],
-            # ['you','okay'],
-            # ['you','okay'],
+            ['you','okay'],
+            ['you','okay'],
+            ['you','okay'],
+            ['you','okay'],
+            ['you','okay'],
             ['good','morning'],
             ['good','morning'],
             ['good','morning'],
@@ -277,16 +273,16 @@ class Application(tk.Frame):
             ['nice','meet','you']
             ]
         mgaLocation = [
-            # ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 1\\You 1.mp4',
-            # 'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 1\\Okay 1.mp4'],
-            # ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 2\\You 2.mp4',
-            # 'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 2\\Okay 2.mp4'],
-            # ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 3\\You 3.mp4',
-            # 'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 3\\Okay 3.mp4'],
-            # ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 4\\You 4.mp4',
-            # 'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 4\\Okay 4.mp4'],
-            # ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 5\\You 5.mp4',
-            # 'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 5\\Okay 5.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 1\\You 1.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 1\\Okay 1.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 2\\You 2.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 2\\Okay 2.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 3\\You 3.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 3\\Okay 3.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 4\\You 4.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 4\\Okay 4.mp4'],
+            ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 5\\You 5.mp4',
+            'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Are you okay\\You Okay 5\\Okay 5.mp4'],
             ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 1\\Good 1.mp4',
             'D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 1\\Morning 1.mp4'],
             ['D:\\Users\\JanlofreDy\\Desktop\\Sign Language Videos\\Good Morning\\Good Morning 2\\Good 2.mp4',

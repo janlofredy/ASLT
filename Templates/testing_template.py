@@ -165,7 +165,8 @@ class Application(tk.Frame):
         for i in sent: 
             print(i)
             self.openPose.learn(videoLocation = i, showDisplay =False, label = self.lbl_Words, vFrame = self.v_tab, scrSize = self.video_tab)
-            self.tryGroupByPartLearnEmission(a=False)
+            # self.tryHmmEmission()
+            self.tryGroupLearnEmission()
 
     def get_filename(self):
         self.master.filename =  tk.filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("all files","*.*"),("mp4 files","*.mp4"),("mov files","*.mov")))
@@ -174,20 +175,19 @@ class Application(tk.Frame):
         # print (self.master.filename)
 
         self.lbl_Words['text'] = "Processing Please Wait..."
-        self.test_all()
         # self.lbl_Words.configure(text="Processing Please Wait...")
-        # print(self.master.filename)
-        # self.tr = Thread(target=self.openPose.learn,args =(self.master.filename, False, self.lbl_Words, self.v_tab, self.video_tab) )
-        # # self.tr2 = Thread(target=self.tryHmmEmission)
-        # self.tr2 = Thread(target=self.tryGroupByPartLearnEmission)
-        # self.tr.daemon = True
-        # self.tr2.daemon = True
-        # try:
-        #     self.tr.start()
-        #     self.tr2.start()
+        print(self.master.filename)
+        self.tr = Thread(target=self.openPose.learn,args =(self.master.filename, False, self.lbl_Words, self.v_tab, self.video_tab) )
+        # self.tr2 = Thread(target=self.tryHmmEmission)
+        self.tr2 = Thread(target=self.tryGroupLearnEmission)
+        self.tr.daemon = True
+        self.tr2.daemon = True
+        try:
+            self.tr.start()
+            self.tr2.start()
 
-        # except Exception as e:
-        #     raise
+        except Exception as e:
+            raise
 
 
 
@@ -199,18 +199,19 @@ class Application(tk.Frame):
         # # self.cap_video(self.master.filename)
         # # self.play_video()
 
-    def tryGroupByPartLearnEmission(self,a=True):
-        if a:
-            self.tr.join()
-            self.tr._stop()
+    def tryHmmEmission(self):
+        # self.tr.join()
+        # self.tr._stop()
         testData = self.openPose.keypoints
 
 
         with open('Dataset/learningCache.json') as json_file:
             file = json.load(json_file)
             # print(file.keys())
+
             forInitProb = []
             forTransition = []
+
             states = tuple(file['states'])
 
             for i in states:
@@ -222,25 +223,26 @@ class Application(tk.Frame):
                 # print(tempInner)
                 forTransition.append(tempInner)
             # print(forTransition)
+
             pi = forInitProb
             A = forTransition
+
             mgaAnswers = {}
 
         datasByParts = {}
         for frame in testData:
             for part, keyPointsXnY in frame.items():
-                # print(keyPointsXnY)
                 if part not in self.notIncludedParts:
-                    datass = str(int(round(keyPointsXnY[0])))+","+str(int(round(keyPointsXnY[1])))
-                    if part not in datasByParts.keys():
-                        datasByParts[part] = [datass]
-                    else:
-                        datasByParts[part].append(datass)
-        # print(file)
+                    for i in range(2):
+                        partName = part+'X' if i==0 else part+'Y'
+                        if partName not in datasByParts.keys():
+                            datasByParts[partName] = [round(keyPointsXnY[i])]
+                        else:
+                            datasByParts[partName].append(round(keyPointsXnY[i]))
+                            
         for key, value in file['emissions'].items():
             # print(key)
-            # print(value)
-            observations = tuple(value['observations'])
+            observations = tuple(value['observations'][0])
 
             forEmission = {}
             for st in states:
@@ -256,32 +258,20 @@ class Application(tk.Frame):
             B = emm
             sequence = []
             for i in datasByParts[key]:
-                # print(i)
                 if i in observations:
                     sequence.append(observations.index(i))
-                # else:
-                    # print('WOW')
 
-            # print(sequence)
             states = states
-            # print(states)
             pi = np.array(pi)
-            # print(pi)
             A = np.array(A)
-            # print(A)
-            # print(len(observations))
             observations = observations
-            # print(B)
             B = np.array(B)
             sequence = np.array(sequence)
-            # print(len(sequence))
-            # print(sequence)
             hmm = HMM(states, pi, A, observations, B, sequence)
             mgaAnswers[key] = hmm.getSequence() if type(hmm.getSequence()) == type(list()) else []
 
 
         print('The Possible answers are')
-        # print(mgaAnswers)
         posAns = {}
         for key, value in mgaAnswers.items():
             # print(key,value)
@@ -305,11 +295,117 @@ class Application(tk.Frame):
                 posSent.append(sent)
 
         # print(str(posSent))
-        print(ansWithCount)
+        # print(ansWithCount)
         print(self.getMax(ansWithCount))
         self.lbl_Words['text'] = self.getMax(ansWithCount)
-        # print(mgaAnswers)
 
+
+    def tryGroupLearnEmission(self):
+        self.tr.join()
+        self.tr._stop()
+        testData = self.openPose.keypoints
+        with open('Dataset/learningCache.json') as json_file:
+            file = json.load(json_file)
+            # print(file.keys())
+
+            forInitProb = []
+            forTransition = []
+
+            states = tuple(file['states'])
+
+            for i in states:
+                forInitProb.append(file['initialProbabilities'][i]/sum(file['initialProbabilities'].values()))
+                tempInner = []
+                for j in states:
+                    # print(file['transitionProbabilities'][i][j])
+                    tempInner.append(file['transitionProbabilities'][i][j])
+                # print(tempInner)
+                forTransition.append(tempInner)
+            # print(forTransition)
+
+            pi = forInitProb
+            A = forTransition
+
+            mgaAnswers = {}
+
+        datas = []
+        for frame in testData:
+            tempObs = []
+            for i in range(250):
+                tempObs.append('0'*250)
+            for part,values  in frame.items():
+                if part not in self.notIncludedParts:
+                    x = int(round(values[0]))
+                    y = int(round(values[1]))
+                    tempStr = list(tempObs[x])
+                    tempStr[y] = '1'
+                    tempObs[x] = "".join(tempStr)
+            datas.append("".join(tempObs))
+            # # print(testData[0].keys())
+            # parts = list(testData[0].keys())
+            # parts.sort()
+            # for part in parts:
+            #     if part not in self.notIncludedParts:
+            #         tempObs += part + str(round(frame[part][0])) +"~"+ str(round(frame[part][1]))+" "
+            # datas.append(tempObs)
+        # print(tempObs)
+
+        observations = tuple(file['observations'])
+        forEmission = {}
+        for st in states:
+            forEmission[str(st)] = []
+        for i in states:
+            for j in observations:
+                forEmission[str(i)].append(file['emissionProbabilities'][str(j)][str(i)])
+        emm = []
+        for i in states:
+            emm.append(forEmission[i])
+        B = emm
+        sequence = []
+
+        # print(len(datas))
+        asd = 1
+        # print(datas)
+
+        for i in datas:
+            # print(datas)
+            if i in observations:
+                print('obs',observations.index(i))
+                sequence.append(observations.index(i))
+            else:
+              print(asd)
+              asd+=1
+
+        # print(len(sequence))
+        states = states
+        print(states)
+        pi = np.array(pi)
+        print(pi)
+        A = np.array(A)
+        print(A)
+        observations = observations
+        print(len(observations))
+        # print(observations)
+        B = np.array(B)
+        # print(B)
+        sequence = np.array(sequence)
+        # print(sequence)
+        try:
+            hmm = HMM(states, pi, A, observations, B, sequence)
+            mgaAnswers = hmm.getSequence() if type(hmm.getSequence()) == type(list()) else []
+
+
+            print('The answer is:')
+            print(len(mgaAnswers), len(sequence))
+            tempAns = [mgaAnswers[0]]
+            for j in range(1,len(mgaAnswers)):
+                if mgaAnswers[j] != mgaAnswers[j-1]:
+                    tempAns.append(mgaAnswers[j])
+            posAns = tempAns
+            print(posAns)
+            self.lbl_Words['text'] = posAns
+        except:
+            self.lbl_Words['text'] = 'Poses not Found'
 
     def tryEmissionTest(self,testData):
         emTest = emissionTest(testData)
