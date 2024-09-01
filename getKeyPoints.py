@@ -417,28 +417,28 @@ class getKeyPoints():
 				self.allNewPoses.append(copy.deepcopy(newFormattedPose))
 				# print(len(self.allNewPoses))
 
-			# Test Plot for the Pose befor Size and Position Compensation
-				# sampX = []
-				# sampY = []
-				# for k,v in oldFormattedPose.items():
-				# 	sampX.append(v[0])
-				# 	sampY.append(v[1])
-				# plt.title('BEFORE')
-				# plt.plot(sampX, sampY, 'ro')
-				# plt.axis([0, 2000, 0, 2000])
-				# plt.show()
+			# # Test Plot for the Pose befor Size and Position Compensation
+			# 	sampX = []
+			# 	sampY = []
+			# 	for k,v in oldFormattedPose.items():
+			# 		sampX.append(2000-v[0])
+			# 		sampY.append(2000-v[1])
+			# 	plt.title('BEFORE')
+			# 	plt.plot(sampX, sampY, 'ro')
+			# 	plt.axis([0, 2000, 0, 2000])
+			# 	plt.show()
 
-			# Test Plot for the Pose after Size and Position Compensation
-				# sampXnew = []
-				# sampYnew = []
-				# for k,v in newFormattedPose.items():
-				# 	# print(k,v)
-				# 	sampXnew.append(v[0])
-				# 	sampYnew.append(v[1])
-				# plt.title('AFTER')
-				# plt.plot(sampXnew, sampYnew, 'ro')
-				# plt.axis([0-width/2, 0+width/2, 0-width/2, 0+width/2])
-				# plt.show()
+			# # Test Plot for the Pose after Size and Position Compensation
+			# 	sampXnew = []
+			# 	sampYnew = []
+			# 	for k,v in newFormattedPose.items():
+			# 		# print(k,v)
+			# 		sampXnew.append(v[0])
+			# 		sampYnew.append(v[1])
+			# 	plt.title('AFTER')
+			# 	plt.plot(sampXnew, sampYnew, 'ro')
+			# 	plt.axis([0-width/2, 0+width/2, 0-width/2, 0+width/2])
+			# 	plt.show()
 
 			self.keypoints = self.allNewPoses
 		print("Finished Resizing!")
@@ -450,7 +450,8 @@ class getKeyPoints():
 			self.label['text'] = "Removing Duplicate Frames..."
 		# print("Removing Duplicate Frames...")
 		numFrames = len(self.keypoints)
-		print('Total Frames:', numFrames)
+		print('Original Number of Frames:', numFrames)
+		orgFrames = numFrames
 		framesToRemove = []
 		framesRemoved = []
 		newFrames = []
@@ -480,7 +481,7 @@ class getKeyPoints():
 				framesRemoved.append(self.keypoints[i])
 		self.keypoints = newFrames
 		numFrames = len(self.keypoints)
-		print("Finished Discarding Duplicates.", numFrames, "Frames now remaining.")
+		print("Finished Discarding",orgFrames-numFrames," Duplicate Frames.", numFrames, "Frames now remaining.")
 
 	def learn(self, videoLocation, showDisplay=True, label = None,vFrame=None, scrSize=None):
 		self.label = label
