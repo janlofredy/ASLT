@@ -7,7 +7,6 @@ import cv2
 import json
 from getKeyPoints import getKeyPoints
 from Modules.EmissionTest import emissionTest
-from tkinter import messagebox
 from Modules.HMM import HMM
 import time
 import copy
@@ -93,19 +92,23 @@ class Application(tk.Frame):
 
         self.lbl_Words['text'] = "Processing Please Wait..."
         # self.lbl_Words.configure(text="Processing Please Wait...")
-        # self.tryTestAll()
+        
+        # print(self.master.filename)
         # PLAY VIDEO WHILE PROCESSING VIDEO
         self.tr = Thread(target=self.openPose.learn,args =(self.master.filename, False, self.lbl_Words, self.v_tab, self.video_tab) )
-        self.tr2 = Thread(target=self.tryHmmEmission)
+        # self.tr2 = Thread(target=self.tryHmmEmission)
+        self.tr2 = Thread(target=self.trySeqLearnEmission)
         self.tr.daemon = True
         self.tr2.daemon = True
         try:
             self.tr.start()
             self.tr2.start()
+
         except Exception as e:
             raise
 
-        # print(self.master.filename)
+
+
         # PLAY VIDEO AFTER LEARNING
         # self.openPose.learn(self.master.filename, False, self.lbl_Words, self.v_tab,[self.video_tab.winfo_width(),self.video_tab.winfo_height()])
         # self.tryHmmEmission()
@@ -209,23 +212,114 @@ class Application(tk.Frame):
                 posSent.append(sent)
 
         # print(str(posSent))
-        print(ansWithCount)
+        # print(ansWithCount)
         print(self.getMax(ansWithCount))
-        self.tempANSWER = ansWithCount
-        ansString = ""
-        for i,j in sorted(ansWithCount.items(), key = 
-             lambda kv:(kv[1], kv[0]), reverse=True):
-            print(i,j)
-            ansString += str(i) + "=" + str(j) + "\n"
-
         self.lbl_Words['text'] = self.getMax(ansWithCount)
-        messagebox.showinfo("Possible Answers", ansString)
 
+
+    def tryGroupLearnEmission(self):
+        self.tr.join()
+        self.tr._stop()
+        testData = self.openPose.keypoints
+        datasByParts = {}
+        for frame in testData:
+            for part, keyPointsXnY in frame.items():
+                if part not in self.notIncludedParts:
+                    if part not in datasByParts.keys():
+                        datasByParts[part] = [round(keyPointsXnY[i])]
+                    else:
+                        datasByParts[part].append(round(keyPointsXnY[i]))
+                    
+
+
+        with open('Dataset/learningCache.json') as json_file:
+            file = json.load(json_file)
+            # print(file.keys())
+
+            forInitProb = []
+            forTransition = []
+
+            states = tuple(file['states'])
+
+            for i in states:
+                forInitProb.append(file['initialProbabilities'][i]/sum(file['initialProbabilities'].values()))
+                tempInner = []
+                for j in states:
+                    # print(file['transitionProbabilities'][i][j])
+                    tempInner.append(file['transitionProbabilities'][i][j])
+                # print(tempInner)
+                forTransition.append(tempInner)
+            # print(forTransition)
+
+            pi = forInitProb
+            A = forTransition
+
+            mgaAnswers = {}
+
+            for key, value in file['emissions'].items():
+                # print(key)
+                observations = tuple(value['observations'][0])
+
+                forEmission = {}
+                for st in states:
+                    forEmission[str(st)] = []
+
+                for i in states:
+                    for j in observations:
+                        forEmission[str(i)].append(value['emissionProbabilities'][str(j)][str(i)])
+
+                emm = []
+                for i in states:
+                    emm.append(forEmission[i])
+                B = emm
+                sequence = []
+                for i in datasByParts[key]:
+                    if i in observations:
+                        sequence.append(observations.index(i))
+
+                states = states
+                pi = np.array(pi)
+                A = np.array(A)
+                observations = observations
+                B = np.array(B)
+                sequence = np.array(sequence)
+                hmm = HMM(states, pi, A, observations, B, sequence)
+                mgaAnswers[key] = hmm.getSequence() if type(hmm.getSequence()) == type(list()) else []
+                print(key, hmm.getSequence())
+
+
+            print('The Possible answers are')
+            # for i,j in mgaAnswers.items
+            posAns = {}
+            for key, value in mgaAnswers.items():
+                # print(key,value)
+                tempAns = [value[0]]
+                for j in range(1,len(value)):
+                    if value[j] != value[j-1]:
+                        tempAns.append(value[j])
+                posAns[key] = tempAns
+
+            posSent = []
+            ansWithCount = {}
+            for key,value in posAns.items():
+                sent = ""
+                for w in value:
+                    sent+=w+" "
+                if sent not in ansWithCount.keys():
+                    ansWithCount[sent] = 1
+                else:
+                    ansWithCount[sent] += 1
+                if sent not in posSent:
+                    posSent.append(sent)
+
+            # print(str(posSent))
+            print(ansWithCount)
+            self.lbl_Words['text'] = self.getMax(ansWithCount)
 
 
     def tryTestAll(self):
-        sent = [
-                "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\1.MOV",
+
+        sent = ["D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\1.MOV",
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\2.MOV",
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\3.MOV",
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\are You Okay\\4.MOV",
@@ -302,14 +396,11 @@ class Application(tk.Frame):
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\4.MOV",
                 "D:\\Users\\JanlofreDy\\Desktop\\By Sentence\\Where are You From\\5.MOV",
                 ]
-        ans = {}
+
         for i in sent: 
             print(i)
             self.openPose.learn(videoLocation = i, showDisplay =False, label = self.lbl_Words, vFrame = self.v_tab, scrSize = self.video_tab)
             self.tryHmmEmission()
-            ans[i] = self.tempANSWER
-        print(ans)
-        print('Finished Test All')
 
 
     def getMax(self, PartWords):

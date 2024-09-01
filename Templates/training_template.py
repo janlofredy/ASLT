@@ -1,16 +1,15 @@
 from tkinter import filedialog
 from tkinter import ttk
 from PIL import ImageTk, Image
-from getKeyPoints import getKeyPoints
-from Modules.EmissionLearn import emissionLearn
-from Modules.HmmEmission import hmmLearning
-from tkinter import messagebox
-from Modules.Entry import EntryWP
 import tkinter as tk
 import numpy as np
 import os
 import cv2
+from getKeyPoints import getKeyPoints
 import json
+from Modules.EmissionLearn import emissionLearn
+from Modules.HmmEmission import hmmLearning
+from tkinter import messagebox
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -36,8 +35,6 @@ class Application(tk.Frame):
         self.wordsList = []
         self.fileLocations = []
         self.btn_file = []
-        self.mgafileExtension = ['.mp4','.mov','.avi']
-        openPose = getKeyPoints()
         self.__init__window()
 
     def init_window(self):
@@ -48,7 +45,6 @@ class Application(tk.Frame):
         self.x = (self.ws/2) - (self.w/2)
         self.y = (self.hs/2) - (self.h/2)
         self.master.geometry('%dx%d+%d+%d'%(self.w,self.h,self.x,self.y))
-        self.master.resizable(width=False, height=False)
         self.master.title('ASLT Prototype')
         self.master.configure(background='white')
         self.master.iconbitmap(r'Assets/icons/sign/favicon.ico')
@@ -84,10 +80,10 @@ class Application(tk.Frame):
         self.bottom_frame.grid(row=3, sticky="nw")
 
     def create_widgets(self):
-        self.text_name.append(EntryWP(self.scroll_frame,"Type Word"))
+        self.text_name.append(tk.Entry(self.scroll_frame,bg="#292f3d", fg="white", font=('bold',12)))
         self.text_name[len(self.text_name)-1].grid(row=len(self.text_name)-1,column=0,sticky="news")
 
-        self.text_filename.append(tk.Entry(self.scroll_frame,font=("bold",12)))
+        self.text_filename.append(tk.Entry(self.scroll_frame, bg="#292f3d", fg="white", font=('bold',12)))
         self.text_filename[len(self.text_filename)-1].grid(row=len(self.text_filename)-1,column=1,sticky="nesw")
 
         self.btn_file.append(tk.Button(self.scroll_frame,bg="gray", text="Insert File",font=('bold',12),width=14,command=self.get_filename))
@@ -106,17 +102,17 @@ class Application(tk.Frame):
         self.button_train_word = tk.Button(self.bottom_frame, text="Start Training",font=('bold',12),bg="green",width=9,command=self.train_signs)
         self.button_train_word.grid(row=0,column=3,sticky="e")
 
-        # self.button_train_asd = tk.Button(self.bottom_frame, text="Train All",font=('bold',12),bg="green",width=9,command=self.autoDoThis)
-        # self.button_train_asd.grid(row=0,column=4,sticky="e")
+        self.button_train_asd = tk.Button(self.bottom_frame, text="autoDoThis",font=('bold',12),bg="green",width=9,command=self.autoDoThis)
+        self.button_train_asd.grid(row=0,column=4,sticky="e")
     
     def add_entry(self):
-        if self.text_name[len(self.text_name)-1].get()=="Type Word" or self.text_filename[len(self.text_filename)-1].get()=="Filename":
+        if self.text_name[len(self.text_name)-1].get()=="" or self.text_filename[len(self.text_filename)-1].get()=="":
             pass
         else:
-            self.text_name.append(EntryWP(self.scroll_frame,"Type Word"))
+            self.text_name.append(tk.Entry(self.scroll_frame, bg="#292f3d", fg="white", font=('bold',12)))
             self.text_name[len(self.text_name)-1].grid(row=len(self.text_name)-1,column=0,sticky="nesw")
 
-            self.text_filename.append(tk.Entry(self.scroll_frame,font=("bold",12)))
+            self.text_filename.append(tk.Entry(self.scroll_frame, bg="#292f3d", fg="white", font=('bold',12)))
             self.text_filename[len(self.text_filename)-1].grid(row=len(self.text_filename)-1,column=1,sticky="nesw")
 
             self.btn_file.append(tk.Button(self.scroll_frame,bg="gray", text="Insert File",width=14,font=('bold',12),command=self.get_filename))
@@ -156,54 +152,42 @@ class Application(tk.Frame):
         x = 0
 
     def train_signs(self):
-        wordsLista = []
+        self.wordsList = []
         for i in self.text_name:
-            wordsLista.append(str(i.get()).lower())
-        # print(self.text_name[0].get())
+            self.wordsList.append(str(i.get()).lower())
+        print(self.wordsList)
         numOfWords = len(self.text_name)
-        noTypeError = True
-        typeErrors = []
-        # print(self.fileLocations)
-        if len(self.fileLocations) != 0:
-            for i in self.fileLocations:
-                for j in self.mgafileExtension:
-                    typeErrors.append(j.lower() not in i.lower())
-                    # print(i.lower(), j.lower(), j.lower() not in i.lower())
-            noTypeError = True in typeErrors
-        else:
-            noTypeError = False
-
-        if 'type word' not in wordsLista and '' not in self.fileLocations and noTypeError:
+        if "" not in self.wordsList or "" not in self.fileLocations:
             for i in range(numOfWords):
-                wordName = wordsLista[i]
+                wordName = self.wordsList[i]
                 fileLocation = self.fileLocations[i]
-                # print("Word:",wordsLista[i])
+                # print("Word:",self.wordsList[i])
                 # print("Location:",self.fileLocations[i])
+                openPose = getKeyPoints()
                 openPose.learn(fileLocation,showDisplay=False)
                 self.saveToDataset(openPose.getKeyPoints(), wordName)
             with open(self.wordTransitionsLocation,'r') as wordTransitionsDataset:
                 transitionsDataset = json.load(wordTransitionsDataset)
-                transitionsDataset['sentences'].append(wordsLista)
+                transitionsDataset['sentences'].append(self.wordsList)
                 datasetString = json.dumps(transitionsDataset, cls=MyEncoder)
                 f = open(self.wordTransitionsLocation,'w')
                 f.write(datasetString)
                 f.close()
 
-            learning = hmmLearning(self.datasetLocation)
-            learning.startLearnFromDataset()
-            learning.saveLearningCache()
-
-            for i in range(len(self.text_name)):
-                self.delete_entry()
-            self.text_filename[0].delete(0,'end')
-            self.text_name[0].delete(0,'end')
-
-            print('FINISHED!!!')
-            messagebox.showinfo("Complete", 'Learn Complete!!!')
         else:
             print('SOMETHING IS EMPTY PLEASE FILL IT IN!!!')
-            messagebox.showinfo('ERROR','AN ENTRY IS INVALID!!!')
 
+        learning = hmmLearning(self.datasetLocation)
+        learning.startLearnFromDataset()
+        learning.saveLearningCache()
+
+        for i in range(len(self.text_name)):
+            self.delete_entry()
+        self.text_filename[0].delete(0,'end')
+        self.text_name[0].delete(0,'end')
+
+        print('FINISHED!!!')
+        messagebox.showinfo("Complete", 'Learn Complete!!!')
 
     def saveToDataset(self,data,word):
         
