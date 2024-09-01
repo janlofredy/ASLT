@@ -9,6 +9,8 @@ import copy
 import matplotlib.pyplot as plt
 import json
 import numpy
+import tkinter as tk
+from PIL import ImageTk, Image
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -43,7 +45,10 @@ class getKeyPoints():
 		self.flags = argparse.ArgumentParser()
 
 	def compensateSizePosition(self):
-		print("Resizing Keypoints")
+		if self.label == None:
+			print('Resizing Keypoints')
+		else:
+			self.label['text'] = "Resizing Keypoints"
 		#Create A 250x250 Bounding box to put the keypoints in for size and position compensation
 		width = 250
 		height = 250
@@ -353,23 +358,23 @@ class getKeyPoints():
 				oldFormattedPose['leftLFTwo'] = oldPose['leftHand']['18']
 				# 						leftLFThree
 				oldFormattedPose['leftLFThree'] = oldPose['leftHand']['19']
-				# 							leftLFFourA
-				oldFormattedPose['leftLFFourA'] = oldPose['leftHand']['20']
+				# 							leftLFFour
+				oldFormattedPose['leftLFFour'] = oldPose['leftHand']['20']
 				# 				leftRFOne
 				oldFormattedPose['leftRFOne'] = oldPose['leftHand']['13']
 				# 					leftRFTwo
 				oldFormattedPose['leftRFTwo'] = oldPose['leftHand']['14']
 				#						leftRFThree
 				oldFormattedPose['leftRFThree'] = oldPose['leftHand']['15']
-				# 							leftRFFourA
-				oldFormattedPose['leftRFFourA'] = oldPose['leftHand']['16']
+				# 							leftRFFour
+				oldFormattedPose['leftRFFour'] = oldPose['leftHand']['16']
 				# 				leftMFOne
 				oldFormattedPose['leftMFOne'] = oldPose['leftHand']['9']
 				# 					leftMFTwo
 				oldFormattedPose['leftMFTwo'] = oldPose['leftHand']['10']
-				# 						leftLFMThree
-				oldFormattedPose['leftLFMThree'] = oldPose['leftHand']['11']
-				# 							leftMFFourA
+				# 						leftMFThree
+				oldFormattedPose['leftMFThree'] = oldPose['leftHand']['11']
+				# 							leftMFFour
 				oldFormattedPose['leftMFFour'] = oldPose['leftHand']['12']
 				# 				leftPFOne
 				oldFormattedPose['leftPFOne'] = oldPose['leftHand']['5']
@@ -436,12 +441,22 @@ class getKeyPoints():
 				# plt.show()
 
 			self.keypoints = self.allNewPoses
-		print("Finished Resizing!")
+		if self.label == None:
+			print('Finished Resizing!')
+		else:
+			self.label['text'] = "Finished Resizing!"
 
 	def removeUselessFrames(self):
-		print("Removing Duplicate Frames...")
+		if self.label == None:
+			print('Removing Duplicate Frames...')
+		else:
+			self.label['text'] = "Removing Duplicate Frames..."
+		# print("Removing Duplicate Frames...")
 		numFrames = len(self.keypoints)
-		print('Total Frames:', numFrames)
+		if self.label == None:
+			print('Total Frames:', numFrames)
+		else:
+			self.label['text'] = 'Total Frames:', numFrames
 		framesToRemove = []
 		framesRemoved = []
 		newFrames = []
@@ -471,9 +486,15 @@ class getKeyPoints():
 				framesRemoved.append(self.keypoints[i])
 		self.keypoints = newFrames
 		numFrames = len(self.keypoints)
-		print("Finished Discarding Duplicates.", numFrames, "Frames now remaining.")
+		if self.label == None:
+			print("Finished Discarding Duplicates.", numFrames, "Frames now remaining.")
+		else:
+			self.label['text'] = "Finished Discarding Duplicates.", numFrames, "Frames now remaining."
 
-	def learn(self, videoLocation, showDisplay=True):
+	def learn(self, videoLocation, showDisplay=True, label = None,vFrame=None, scrSize=None):
+		self.label = label
+		self.vFrame = vFrame
+		self.flags = argparse.ArgumentParser()
 		self.flags.add_argument("--video", default = videoLocation, help="Set the video")
 		self.flags.add_argument("--no_display", default = not(showDisplay), help="Set to True to Disable Display")		
 		self.args = self.flags.parse_known_args()
@@ -502,7 +523,10 @@ class getKeyPoints():
 		self.keypointsUnprocessed = []
 		self.posedVideo = []
 		videoToProcess = cv2.VideoCapture(self.args[0].video)
-		print('Processing Video(Collecting Keypoints)... \nPlease Wait')
+		if self.label == None:
+			print('Processing Video(Collecting Keypoints)... \nPlease Wait')
+		else:
+			self.label['text'] = "Processing Video(Collecting Keypoints)... Please Wait"
 		while(videoToProcess.isOpened()):
 			keys = {"body":[], "rightHand":[], "leftHand":[]}
 			datum = op.Datum()
@@ -582,10 +606,25 @@ class getKeyPoints():
 				key = cv2.waitKey(15)
 				if key == 27: break
 
-
-		print('Finished Processing')
+			if self.vFrame != None:
+				try:
+					frame = datum.cvOutputData
+					cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+					img = Image.fromarray(cv2image)
+					imgtk = ImageTk.PhotoImage(img.resize((scrSize.winfo_width(),scrSize.winfo_height())))
+					self.vFrame.imgtk = imgtk
+					self.vFrame.configure(image=imgtk)
+					key = cv2.waitKey(15)
+					if key == 27: break
+				except Exception as e:
+					raise
+		if self.label == None:
+			print('Finished Processing')
+		else:
+			self.label['text'] = 'Finished Processing'
 		self.compensateSizePosition()
-		return self.keypoints
+		self.removeUselessFrames()
+		# return self.keypoints
 
 	def writeJSON(self,word):
 		f = open("dataset.json",'r')

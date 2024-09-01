@@ -1,0 +1,29 @@
+Sentence		Correct		Wrong	Total
+are You Okay		0		8	8
+Good Morning		0		9	9
+How are You		3		8	11
+how Old are You		2		6	8
+I Like You		0		6	6
+I'm Fine		0		9	9
+let's Eat		0		5	5
+Nice to Meet You	0		9	9
+what are you Doing	0		5	5
+Where are you from	0		5	5
+			5		70	75
+
+
+Sentence		Correct		Wrong	Total
+are You Okay		0		8	8
+Good Morning		0		9	9
+How are You		0		11	11
+how Old are You		0		8	8
+I Like You		0		6	6
+I'm Fine		0		9	9
+let's Eat		0		5	5
+Nice to Meet You	0			9
+what are you Doing	0		0	5
+Where are you from	0		0	5
+			0		0	75
+
+
+
