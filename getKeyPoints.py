@@ -441,7 +441,10 @@ class getKeyPoints():
 				# plt.show()
 
 			self.keypoints = self.allNewPoses
-		print("Finished Resizing!")
+		if self.label == None:
+			print('Finished Resizing!')
+		else:
+			self.label['text'] = "Finished Resizing!"
 
 	def removeUselessFrames(self):
 		if self.label == None:
@@ -450,7 +453,10 @@ class getKeyPoints():
 			self.label['text'] = "Removing Duplicate Frames..."
 		# print("Removing Duplicate Frames...")
 		numFrames = len(self.keypoints)
-		print('Total Frames:', numFrames)
+		if self.label == None:
+			print('Total Frames:', numFrames)
+		else:
+			self.label['text'] = 'Total Frames:', numFrames
 		framesToRemove = []
 		framesRemoved = []
 		newFrames = []
@@ -480,7 +486,10 @@ class getKeyPoints():
 				framesRemoved.append(self.keypoints[i])
 		self.keypoints = newFrames
 		numFrames = len(self.keypoints)
-		print("Finished Discarding Duplicates.", numFrames, "Frames now remaining.")
+		if self.label == None:
+			print("Finished Discarding Duplicates.", numFrames, "Frames now remaining.")
+		else:
+			self.label['text'] = "Finished Discarding Duplicates.", numFrames, "Frames now remaining."
 
 	def learn(self, videoLocation, showDisplay=True, label = None,vFrame=None, scrSize=None):
 		self.label = label
@@ -609,7 +618,10 @@ class getKeyPoints():
 					if key == 27: break
 				except Exception as e:
 					raise
-		print('Finished Processing')
+		if self.label == None:
+			print('Finished Processing')
+		else:
+			self.label['text'] = 'Finished Processing'
 		self.compensateSizePosition()
 		self.removeUselessFrames()
 		# return self.keypoints
