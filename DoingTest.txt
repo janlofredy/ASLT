@@ -1,0 +1,45 @@
+0 Learned
+Doing 1
+	{'you ': 6, 'how you ': 34, 'eat ': 9, 'you okay ': 1, 'how ': 4, 'where you ': 1, 'good ': 4, 'old you ': 8, 'you from ': 1, 'good morning ': 15, 'old you from ': 4, 'old ': 1}
+Doing 2
+	{'i like ': 1, 'how you okay ': 5, 'i ': 1, 'you okay ': 5, 'you ': 12, 'how you ': 19, 'eat ': 9, 'where you ': 4, 'good ': 1, 'how ': 7, 'where you from ': 3, 'good morning ': 8, 'old you ': 7, 'how you from ': 1, 'old you from ': 4, 'i like you from ': 1}
+Doing 3
+	{'you ': 15, 'how you ': 38, 'you okay ': 2, 'eat ': 9, 'old you ': 10, 'how ': 2, 'good morning ': 6, 'where you ': 1, 'old you from ': 4, 'you from ': 1}
+Doing 4
+	{'you okay ': 2, 'how you ': 38, 'you ': 11, 'eat ': 10, 'where you ': 2, 'good ': 1, 'how you okay ': 1, 'how ': 2, 'old you ': 17, 'good morning ': 2, 'old you from ': 2}
+1 Learned
+Doing 1
+	{'doing ': 88}
+Doing 2
+	{'i like ': 1, 'how you okay ': 5, 'i ': 1, 'you okay ': 5, 'you ': 12, 'how you ': 19, 'eat ': 9, 'where you ': 4, 'good ': 1, 'how ': 7, 'where you from ': 3, 'doing ': 1, 'good morning ': 7, 'old you ': 7, 'how you from ': 1, 'old you from ': 4, 'i like you from ': 1}
+Doing 3
+	{'you ': 15, 'how you ': 38, 'you okay ': 2, 'eat ': 9, 'old you ': 10, 'how ': 2, 'good morning ': 6, 'where you ': 1, 'old you from ': 4, 'you from ': 1}
+Doing 4
+	{'you okay ': 2, 'how you ': 38, 'you ': 11, 'eat ': 10, 'where you ': 2, 'good ': 1, 'how you okay ': 1, 'how ': 2, 'old you ': 17, 'good morning ': 2, 'old you from ': 2}
+2 Learned
+Doing 1
+	{'doing ': 87, 'old ': 1}
+Doing 2
+	{'doing ': 88}
+Doing 3
+	{'you ': 14, 'how you ': 38, 'you okay ': 2, 'eat ': 9, 'old you ': 10, 'doing ': 1, 'how ': 2, 'good morning ': 6, 'where you ': 1, 'old you from ': 4, 'you from ': 1}
+Doing 4
+	{'you okay ': 2, 'how you ': 38, 'you ': 11, 'eat ': 10, 'where you ': 2, 'good ': 1, 'how you okay ': 1, 'how ': 2, 'old you ': 17, 'good morning ': 2, 'old you from ': 2}
+3 Learned
+Doing 1
+	{'doing ': 87, 'old ': 1}
+Doing 2
+	{'doing ': 88}
+Doing 3
+	{'doing ': 88}
+Doing 4
+	{'you okay ': 2, 'how you ': 38, 'you ': 11, 'eat ': 10, 'where you ': 2, 'good ': 1, 'how you okay ': 1, 'how ': 2, 'old you ': 17, 'good morning ': 2, 'old you from ': 2}
+4 Learned
+Doing 1
+	{'doing ': 86, 'good ': 1, 'old ': 1}
+Doing 2
+	{'doing ': 88}
+Doing 3
+	{'doing ': 88}
+Doing 4
+	{'doing ': 85, 'you okay ': 1, 'eat ': 2}

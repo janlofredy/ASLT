@@ -1,0 +1,133 @@
+0 Learned Nice To meet You
+1
+	{'good ': 10, 'how you ': 22, 'you ': 6, 'old you ': 2, 'old you okay ': 1, 'you from ': 2, 'i like you from ': 1, 'i like you ': 2, 'how you okay ': 2, 'how you from ': 1, 'i like you okay ': 1, 'im ': 7, 'how ': 2, 'old ': 17, 'where ': 4, 'i ': 3, 'eat ': 5}
+2
+	{'im ': 1, 'how you okay ': 3, 'eat ': 1, 'old you okay ': 1, 'how you ': 46, 'you ': 26, 'how you from ': 1, 'you from ': 1, 'old you ': 7, 'old you from ': 1}
+3
+	{'old you okay ': 1, 'how you from ': 1, 'you ': 49, 'old you ': 7, 'how you ': 23, 'old you from ': 4, 'where you ': 1, 'how you okay ': 2}
+4
+	{'old you okay ': 1, 'you okay ': 1, 'how you okay ': 3, 'where you ': 1, 'you ': 14, 'how you ': 58, 'i like you okay ': 1, 'i like you ': 3, 'old you ': 5, 'how you from ': 1}
+5
+	{'old you ': 12, 'how you ': 35, 'you ': 24, 'how you okay ': 8, 'i like you ': 1, 'where you ': 7, 'how ': 1}
+6
+	{'you from ': 8, 'how you okay ': 2, 'you ': 27, 'how you ': 36, 'how you from ': 2, 'where you ': 2, 'i like you ': 1, 'old you ': 10}
+7
+	{'you ': 10, 'how you okay ': 2, 'how you ': 50, 'how you from ': 2, 'old you ': 21, 'you from ': 2, 'where you ': 1}
+8
+	{'im fine ': 1, 'how you ': 55, 'eat ': 1, 'you ': 18, 'where you ': 6, 'old you ': 3, 'how you from ': 3, 'old you from ': 1}
+9
+	{'old you ': 13, 'you ': 37, 'i like you ': 1, 'how you ': 31, 'where you ': 1, 'how you from ': 2, 'doing ': 2, 'you from ': 1}
+1 Learned Nice To meet You
+1
+	{'good ': 10, 'how you ': 22, 'you ': 6, 'old you ': 2, 'old you okay ': 1, 'you from ': 2, 'i like you from ': 1, 'i like you ': 2, 'how you okay ': 2, 'how you from ': 1, 'i like you okay ': 1, 'im ': 7, 'how ': 2, 'old ': 17, 'where ': 4, 'i ': 3, 'eat ': 5}
+2
+	{'im ': 1, 'how you okay ': 3, 'eat ': 1, 'old you okay ': 1, 'how you ': 46, 'you ': 25, 'how you from ': 1, 'you from ': 2, 'old you ': 7, 'old you from ': 1}
+3
+	{'old you okay ': 2, 'how you from ': 1, 'you ': 49, 'old you ': 5, 'how you ': 23, 'old you from ': 4, 'where you ': 1, 'how you okay ': 2, 'nice meet you ': 1}
+4
+	{'old you okay ': 1, 'you okay ': 1, 'how you okay ': 3, 'where you okay ': 1, 'you ': 13, 'i like you ': 4, 'how you ': 57, 'i like you okay ': 1, 'old you ': 5, 'how you from ': 1, 'nice meet you ': 1}
+5
+	{'old you ': 12, 'how you ': 35, 'you ': 24, 'how you okay ': 8, 'i like you ': 1, 'where you ': 7, 'how ': 1}
+6
+	{'you from ': 8, 'how you okay ': 2, 'you ': 27, 'how you ': 36, 'how you from ': 2, 'where you ': 2, 'i like you ': 1, 'old you ': 10}
+7
+	{'you ': 9, 'how you okay ': 2, 'how you ': 51, 'how you from ': 3, 'old you ': 21, 'you from ': 1, 'where you ': 1}
+8
+	{'im fine ': 1, 'how you ': 55, 'eat ': 1, 'you ': 18, 'where you ': 6, 'old you ': 3, 'how you from ': 3, 'old you from ': 1}
+9
+	{'old you ': 13, 'you ': 36, 'you from ': 2, 'i like you ': 1, 'how you ': 31, 'where you ': 1, 'how you from ': 2, 'doing ': 2}
+2 Learned Nice To meet You
+1
+	{'good ': 10, 'how you ': 22, 'you ': 6, 'old you ': 2, 'old you okay ': 1, 'you from ': 2, 'i like you from ': 1, 'i like you ': 2, 'how you okay ': 2, 'how you from ': 1, 'i like you okay ': 1, 'im ': 7, 'how ': 2, 'old ': 17, 'where ': 4, 'i ': 3, 'eat ': 5}
+2
+	{'im ': 1, 'how you okay ': 3, 'eat ': 1, 'old you okay ': 1, 'how you ': 46, 'you ': 26, 'how you from ': 1, 'you from ': 2, 'old you ': 6, 'old you from ': 1}
+3
+	{'old you okay ': 2, 'how you from ': 1, 'you ': 49, 'old you ': 5, 'how you ': 23, 'old you from ': 4, 'where you ': 1, 'how you okay ': 2, 'nice meet you ': 1}
+4
+	{'old you okay ': 1, 'you okay ': 1, 'how you okay ': 3, 'where you okay ': 1, 'you ': 13, 'i like you ': 3, 'how you ': 56, 'nice meet you ': 4, 'nice meet you okay ': 1, 'old you ': 4, 'how you from ': 1}
+5
+	{'old you ': 11, 'how you ': 36, 'you ': 23, 'how you okay ': 8, 'i like you ': 1, 'where you ': 7, 'how ': 1, 'nice meet you ': 1}
+6
+	{'you from ': 8, 'how you okay ': 2, 'you ': 25, 'how you ': 34, 'how you from ': 3, 'where you ': 3, 'i like you ': 1, 'old you ': 11, 'you okay ': 1}
+7
+	{'you ': 7, 'how you okay ': 2, 'how you ': 51, 'how you from ': 3, 'old you ': 23, 'you from ': 1, 'where you ': 1}
+8
+	{'im fine ': 1, 'how you ': 55, 'eat ': 1, 'you ': 19, 'where you ': 6, 'old you ': 2, 'how you from ': 3, 'old you from ': 1}
+9
+	{'old you ': 12, 'you ': 36, 'you from ': 2, 'i like you ': 1, 'how you ': 30, 'where you ': 1, 'how you from ': 3, 'doing ': 2, 'nice meet you ': 1}
+3 Learned Nice To meet You
+1
+	{'good ': 10, 'how you ': 22, 'you ': 6, 'old you ': 2, 'old you okay ': 1, 'you from ': 2, 'i like you from ': 1, 'i like you ': 2, 'how you okay ': 2, 'how you from ': 1, 'i like you okay ': 1, 'im ': 7, 'how ': 2, 'old ': 17, 'where ': 4, 'i ': 3, 'eat ': 5}
+2
+	{'im ': 1, 'how you okay ': 3, 'eat ': 1, 'old you okay ': 1, 'how you ': 46, 'you ': 26, 'how you from ': 1, 'you from ': 2, 'old you ': 6, 'old you from ': 1}
+3
+	{'old you okay ': 2, 'how you from ': 1, 'you ': 45, 'old you ': 4, 'how you ': 23, 'old you from ': 4, 'where you ': 1, 'nice meet you from ': 5, 'how you okay ': 2, 'nice meet you ': 1}
+4
+	{'nice meet you okay ': 1, 'you okay ': 1, 'how you okay ': 3, 'where you okay ': 1, 'you ': 11, 'i like you ': 4, 'how you ': 51, 'i like you okay ': 1, 'nice meet you ': 9, 'old you ': 5, 'how you from ': 1}
+5
+	{'old you ': 11, 'how you ': 35, 'you ': 22, 'how you okay ': 8, 'i like you ': 1, 'where you ': 7, 'nice meet you ': 2, 'you okay ': 1, 'how ': 1}
+6
+	{'you from ': 9, 'how you okay ': 2, 'you ': 23, 'how you ': 34, 'how you from ': 3, 'where you ': 3, 'i like you ': 1, 'old you ': 11, 'you okay ': 2}
+7
+	{'you ': 7, 'how you okay ': 2, 'how you ': 50, 'how you from ': 3, 'old you ': 24, 'you from ': 1, 'where you ': 1}
+8
+	{'im fine ': 1, 'how you ': 53, 'eat ': 1, 'you ': 19, 'where you ': 7, 'old you ': 2, 'how you from ': 3, 'how you okay ': 1, 'old you from ': 1}
+9
+	{'old you ': 12, 'you ': 33, 'you from ': 1, 'i like you ': 1, 'how you ': 28, 'nice meet you ': 2, 'where you ': 1, 'how you from ': 5, 'doing ': 2, 'nice meet you from ': 3}
+4 Learned Nice To meet You
+1
+	{'good ': 10, 'how you ': 21, 'you ': 6, 'how you okay ': 3, 'old you ': 2, 'old you okay ': 1, 'nice meet you from ': 1, 'i like you from ': 1, 'i like you ': 2, 'how you from ': 1, 'you from ': 1, 'i like you okay ': 1, 'im ': 7, 'how ': 2, 'old ': 17, 'where ': 4, 'i ': 3, 'eat ': 5}
+2
+	{'im ': 1, 'how you okay ': 3, 'eat ': 1, 'old you okay ': 1, 'how you ': 44, 'you ': 24, 'how you from ': 1, 'you from ': 2, 'old you ': 6, 'nice meet you from ': 1, 'old you from ': 1, 'nice meet you ': 3}
+3
+	{'old you okay ': 2, 'how you from ': 1, 'you ': 44, 'old you ': 4, 'how you ': 23, 'old you from ': 4, 'where you ': 1, 'nice meet you from ': 5, 'how you okay ': 2, 'nice meet you ': 2}
+4
+	{'nice meet you okay ': 2, 'you okay ': 1, 'where you okay ': 1, 'you ': 9, 'i like you ': 3, 'how you ': 45, 'nice meet you ': 18, 'how you okay ': 2, 'i like you okay ': 1, 'old you ': 5, 'how you from ': 1}
+5
+	{'nice meet you ': 16, 'how you ': 28, 'you ': 15, 'nice meet you okay ': 4, 'i like you ': 1, 'how you okay ': 6, 'where you ': 7, 'old you ': 10, 'how ': 1}
+6
+	{'you from ': 9, 'how you okay ': 2, 'you ': 22, 'how you ': 33, 'how you from ': 3, 'where you ': 2, 'i like you ': 1, 'old you ': 12, 'you okay ': 2, 'nice meet you ': 2}
+7
+	{'you ': 6, 'how you okay ': 2, 'how you ': 47, 'nice meet you ': 2, 'how you from ': 3, 'old you ': 26, 'you from ': 1, 'where you ': 1}
+8
+	{'im fine ': 1, 'how you ': 51, 'eat ': 1, 'you ': 19, 'where you ': 6, 'old you ': 3, 'how you from ': 3, 'how you okay ': 2, 'old you from ': 1, 'nice meet you ': 1}
+9
+	{'old you ': 12, 'you ': 32, 'you from ': 1, 'i like you ': 1, 'how you ': 27, 'nice meet you ': 3, 'where you ': 1, 'how you from ': 6, 'doing ': 2, 'nice meet you from ': 3}
+5 Learned Nice To meet You
+1
+	{'good ': 10, 'how you ': 20, 'you ': 7, 'how you okay ': 3, 'old you ': 2, 'old you okay ': 1, 'nice meet you from ': 1, 'i like you from ': 1, 'i like you ': 2, 'you from ': 2, 'i like you okay ': 1, 'im ': 7, 'how ': 2, 'old ': 17, 'where ': 4, 'i ': 3, 'eat ': 5}
+2
+	{'im ': 1, 'how you okay ': 3, 'eat ': 1, 'old you okay ': 1, 'how you ': 40, 'you ': 25, 'how you from ': 1, 'you from ': 2, 'old you ': 6, 'nice meet you ': 5, 'nice meet you from ': 1, 'old you from ': 1, 'nice meet you okay ': 1}
+3
+	{'you okay ': 1, 'nice meet you from ': 7, 'you ': 36, 'old you ': 5, 'how you ': 23, 'old you from ': 4, 'old you okay ': 1, 'where you ': 1, 'how you okay ': 2, 'nice meet you ': 7, 'nice meet you okay ': 1}
+4
+	{'nice meet you okay ': 3, 'how you okay ': 3, 'where you okay ': 1, 'you ': 6, 'i like you ': 3, 'how you ': 43, 'nice meet you ': 21, 'i like you okay ': 1, 'old you ': 5, 'how you from ': 1, 'you okay ': 1}
+5
+	{'nice meet you ': 17, 'how you ': 29, 'you ': 13, 'nice meet you okay ': 4, 'i like you ': 1, 'how you okay ': 6, 'where you ': 7, 'old you ': 10, 'how ': 1}
+6
+	{'you from ': 8, 'how you okay ': 2, 'you ': 21, 'how you ': 33, 'how you from ': 3, 'where you ': 2, 'i like you ': 1, 'old you ': 12, 'you okay ': 2, 'nice meet you ': 3, 'nice meet you from ': 1}
+7
+	{'you ': 4, 'how you okay ': 2, 'how you ': 39, 'nice meet you ': 13, 'nice meet you from ': 6, 'old you ': 22, 'how you from ': 2}
+8
+	{'im fine ': 1, 'how you ': 53, 'nice meet ': 1, 'you ': 14, 'where you ': 5, 'old you ': 3, 'nice meet you ': 4, 'nice meet you from ': 2, 'how you okay ': 2, 'old you from ': 1, 'how you from ': 2}
+9
+	{'old you ': 12, 'you ': 32, 'you from ': 1, 'i like you ': 1, 'nice meet you ': 5, 'how you ': 25, 'where you ': 1, 'how you from ': 6, 'doing ': 2, 'nice meet you from ': 3}
+6 Learned Nice To meet You
+1
+	{'good ': 10, 'nice meet you ': 1, 'you okay ': 2, 'how you ': 19, 'how you okay ': 3, 'you ': 6, 'old you ': 2, 'old you okay ': 1, 'nice meet you from ': 1, 'i like you from ': 1, 'i like you ': 2, 'you from ': 1, 'i like you okay ': 1, 'im ': 7, 'how ': 2, 'old ': 17, 'where ': 4, 'i ': 3, 'eat ': 5}
+2
+	{'im ': 1, 'how you okay ': 3, 'eat ': 1, 'old you okay ': 1, 'how you ': 40, 'you ': 23, 'how you from ': 1, 'you from ': 2, 'old you ': 6, 'nice meet you ': 7, 'nice meet you from ': 1, 'old you from ': 1, 'nice meet you okay ': 1}
+3
+	{'you okay ': 1, 'nice meet you from ': 8, 'you ': 33, 'nice meet you ': 9, 'old you ': 5, 'how you ': 23, 'old you from ': 4, 'old you okay ': 1, 'where you ': 1, 'how you okay ': 2, 'nice meet you okay ': 1}
+4
+	{'nice meet you okay ': 3, 'how you okay ': 3, 'where you okay ': 1, 'you ': 5, 'i like you ': 3, 'how you ': 38, 'nice meet you ': 27, 'i like you okay ': 1, 'old you ': 5, 'how you from ': 1, 'you okay ': 1}
+5
+	{'nice meet you ': 21, 'how you ': 27, 'you ': 10, 'nice meet you okay ': 6, 'i like you ': 1, 'how you okay ': 6, 'where you ': 7, 'old you ': 9, 'how ': 1}
+6
+	{'you from ': 8, 'how you okay ': 2, 'you ': 20, 'how you ': 32, 'how you from ': 3, 'where you ': 3, 'i like you ': 1, 'old you ': 12, 'you okay ': 2, 'nice meet you ': 3, 'nice meet you from ': 2}
+7
+	{'nice meet you okay ': 1, 'how you okay ': 2, 'how you ': 38, 'nice meet you ': 17, 'nice meet you from ': 6, 'how you from ': 2, 'old you ': 20, 'you ': 2}
+8
+	{'nice meet you ': 14, 'how you ': 50, 'you ': 10, 'where you ': 4, 'old you ': 3, 'nice meet you from ': 3, 'how you okay ': 1, 'nice meet you okay ': 1, 'old you from ': 1, 'how you from ': 1}
+9
+	{'old you ': 12, 'nice meet you ': 8, 'you ': 29, 'you from ': 1, 'i like you ': 1, 'how you ': 25, 'where you ': 1, 'how you from ': 4, 'doing ': 2, 'nice meet you from ': 5}
